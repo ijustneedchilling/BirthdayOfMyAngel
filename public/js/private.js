@@ -1,5 +1,6 @@
-// Private page logic + anti-screenshot best-effort protection
+// Private page: Love Game + Login + Protection
 
+const loveGame = document.getElementById('love-game');
 const loginSection = document.getElementById('login-section');
 const privateContent = document.getElementById('private-content');
 const loginForm = document.getElementById('login-form');
@@ -7,33 +8,127 @@ const errorMsg = document.getElementById('error-msg');
 const successMsg = document.getElementById('success-msg');
 const blurOverlay = document.getElementById('blur-overlay');
 
-// Check if already authenticated
-async function checkAuth() {
+const btnYes = document.getElementById('btn-yes');
+const btnNo = document.getElementById('btn-no');
+const catResult = document.getElementById('cat-result');
+const gameButtons = document.getElementById('game-buttons');
+const btnContinue = document.getElementById('btn-continue');
+
+let noClickCount = 0;
+const MAX_RUNAWAY = 6;
+
+// ---------- Init ----------
+async function init() {
+  // First check if already authenticated
   try {
-    const res = await fetch('/api/check-auth');
-    const data = await res.json();
-    if (data.authenticated) {
+    const authRes = await fetch('/api/check-auth');
+    const authData = await authRes.json();
+    if (authData.authenticated) {
       showPrivateContent();
+      return;
+    }
+  } catch (e) {}
+
+  // Check if this IP already played the game
+  try {
+    const gameRes = await fetch('/api/check-game');
+    const gameData = await gameRes.json();
+    if (gameData.alreadyPlayed) {
+      showLogin();
+    } else {
+      showLoveGame();
     }
   } catch (e) {
-    console.log('Auth check failed');
+    showLogin();
   }
 }
 
+function showLoveGame() {
+  loveGame.style.display = 'block';
+  loginSection.style.display = 'none';
+  privateContent.classList.remove('visible');
+}
+
+function showLogin() {
+  loveGame.style.display = 'none';
+  loginSection.style.display = 'block';
+  privateContent.classList.remove('visible');
+}
+
 function showPrivateContent() {
-  loginSection.classList.add('hidden');
+  loveGame.style.display = 'none';
+  loginSection.style.display = 'none';
   privateContent.classList.add('visible');
   document.body.classList.add('protected-page');
   enableProtection();
 }
 
-function showLogin() {
-  loginSection.classList.remove('hidden');
-  privateContent.classList.remove('visible');
-  document.body.classList.remove('protected-page');
+// ---------- Love Game Logic ----------
+btnYes.addEventListener('click', async () => {
+  gameButtons.style.display = 'none';
+  catResult.style.display = 'block';
+  catResult.innerHTML = `
+    <p style="font-size: 2.5rem; margin-bottom: 0.8rem;">🥰</p>
+    <p style="font-size: 1.2rem; color: #f0d0e0; margin-bottom: 1.5rem;">دمت گرم... می‌دونستم 💜</p>
+    <button type="button" class="btn" id="btn-continue-yes" style="max-width: 240px; margin: 0 auto;">بزن بریم پیامتو ببین</button>
+  `;
+  document.getElementById('btn-continue-yes').addEventListener('click', finishGame);
+});
+
+btnNo.addEventListener('click', () => {
+  noClickCount++;
+
+  if (noClickCount < MAX_RUNAWAY) {
+    runAway(btnNo);
+  } else {
+    // 6th time → crying cat
+    gameButtons.style.display = 'none';
+    catResult.style.display = 'block';
+  }
+});
+
+function runAway(btn) {
+  const container = btn.parentElement;
+  const containerRect = container.getBoundingClientRect();
+  const btnRect = btn.getBoundingClientRect();
+
+  const maxX = Math.max(20, containerRect.width - btnRect.width - 20);
+  const maxY = Math.max(30, 120);
+
+  const newX = Math.random() * maxX;
+  const newY = Math.random() * maxY;
+
+  btn.style.position = 'absolute';
+  btn.style.left = newX + 'px';
+  btn.style.top = newY + 'px';
+  btn.style.transition = 'all 0.22s ease';
+  btn.style.zIndex = '10';
+
+  btn.animate([
+    { transform: 'scale(1)' },
+    { transform: 'scale(1.1)' },
+    { transform: 'scale(1)' }
+  ], { duration: 180 });
 }
 
-// Login handler
+// Extra runaway on hover (desktop)
+btnNo.addEventListener('mouseenter', () => {
+  if (noClickCount < MAX_RUNAWAY - 1) {
+    noClickCount++;
+    runAway(btnNo);
+  }
+});
+
+btnContinue.addEventListener('click', finishGame);
+
+async function finishGame() {
+  try {
+    await fetch('/api/mark-game-played', { method: 'POST' });
+  } catch (e) {}
+  showLogin();
+}
+
+// ---------- Login ----------
 loginForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   errorMsg.style.display = 'none';
@@ -56,7 +151,7 @@ loginForm.addEventListener('submit', async (e) => {
       successMsg.style.display = 'block';
       setTimeout(() => {
         showPrivateContent();
-      }, 800);
+      }, 700);
     } else {
       errorMsg.textContent = data.message;
       errorMsg.style.display = 'block';
@@ -67,23 +162,18 @@ loginForm.addEventListener('submit', async (e) => {
   }
 });
 
-// Logout
 async function logout() {
   try {
     await fetch('/api/logout', { method: 'POST' });
   } catch (e) {}
-  showLogin();
   window.location.reload();
 }
 
-// ========== Anti-screenshot / protection best efforts ==========
+// ---------- Anti-screenshot protection ----------
 function enableProtection() {
-  // Disable right-click
   document.addEventListener('contextmenu', (e) => e.preventDefault());
 
-  // Disable common keyboard shortcuts
   document.addEventListener('keydown', (e) => {
-    // PrintScreen, Ctrl+P, Ctrl+S, Ctrl+Shift+I, F12, etc.
     if (
       e.key === 'PrintScreen' ||
       (e.ctrlKey && (e.key === 'p' || e.key === 'P' || e.key === 's' || e.key === 'S')) ||
@@ -95,7 +185,6 @@ function enableProtection() {
     }
   });
 
-  // When tab loses focus / visibility change → hide content
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
       blurOverlay.style.display = 'flex';
@@ -104,7 +193,6 @@ function enableProtection() {
     }
   });
 
-  // Blur on window blur (some screenshot tools)
   window.addEventListener('blur', () => {
     blurOverlay.style.display = 'flex';
   });
@@ -112,7 +200,6 @@ function enableProtection() {
     blurOverlay.style.display = 'none';
   });
 
-  // Prevent drag
   document.addEventListener('dragstart', (e) => e.preventDefault());
 }
 
@@ -131,5 +218,5 @@ function showTempWarning() {
   }, 1500);
 }
 
-// Init
-checkAuth();
+// Start
+init();

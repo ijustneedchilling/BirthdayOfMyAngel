@@ -18,6 +18,18 @@ const credentials = [
 // Active sessions (token -> expiry)
 const sessions = new Map();
 
+// IPs that already saw the love game
+const seenGameIPs = new Set();
+
+function getClientIP(req) {
+  return (
+    req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
+    req.headers['x-real-ip'] ||
+    req.socket.remoteAddress ||
+    'unknown'
+  );
+}
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -27,6 +39,19 @@ app.use(express.static(path.join(__dirname, 'public')));
 function createToken() {
   return crypto.randomBytes(32).toString('hex');
 }
+
+// Check if this IP already played the love game
+app.get('/api/check-game', (req, res) => {
+  const ip = getClientIP(req);
+  res.json({ alreadyPlayed: seenGameIPs.has(ip) });
+});
+
+// Mark IP as having played the game
+app.post('/api/mark-game-played', (req, res) => {
+  const ip = getClientIP(req);
+  seenGameIPs.add(ip);
+  res.json({ success: true });
+});
 
 // Login endpoint
 app.post('/api/login', (req, res) => {
