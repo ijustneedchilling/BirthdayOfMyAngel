@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Private | سپید جان</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔐</text></svg>">
+  <style>
+    /* Extra protection for private page */
+    body.protected-page {
+      -webkit-user-select: none !important;
+      user-select: none !important;
+      -webkit-touch-callout: none !important;
+    }
+    #private-content {
+      display: none;
+    }
+    #private-content.visible {
+      display: block;
+    }
+    #login-section.hidden {
+      display: none;
+    }
+    .blur-overlay {
+      position: fixed;
+      inset: 0;
+      background: #1a1220;
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      color: #e0b8d0;
+      font-size: 1.15rem;
+      text-align: center;
+      padding: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="flower lily" style="top: 18%; left: 6%; animation-delay: 2s;"></div>
+  <div class="flower tulip" style="bottom: 18%; right: 8%; animation-delay: 0.8s;"></div>
+
+  <nav class="nav">
+    <a href="/">عمومی</a>
+    <a href="/dard.html">درد و دل‌ها</a>
+    <a href="/private.html" class="active">Private</a>
+  </nav>
+
+  <div class="container">
+    <!-- Login Section -->
+    <div id="login-section">
+      <section class="glass hero">
+        <span class="hero-emoji">🔐</span>
+        <h1>بخش خصوصی</h1>
+        <p class="subtitle">اینجا فقط برای توئه</p>
+      </section>
+
+      <section class="glass">
+        <div class="warning-box">
+          ⚠️ هر کلید فقط یک‌بار قابل استفاده‌ست. بعد از ورود، دیگه کار نمی‌کنه.
+        </div>
+
+        <div class="error-msg" id="error-msg"></div>
+        <div class="success-msg" id="success-msg"></div>
+
+        <form class="login-form" id="login-form">
+          <div class="form-group">
+            <label for="username">یوزرنیم</label>
+            <input type="text" id="username" name="username" autocomplete="off" required placeholder="username">
+          </div>
+          <div class="form-group">
+            <label for="password">پسورد</label>
+            <input type="password" id="password" name="password" autocomplete="off" required placeholder="password">
+          </div>
+          <button type="submit" class="btn">ورود به بخش خصوصی</button>
+        </form>
+      </section>
+    </div>
+
+    <!-- Private Content (hidden until auth) -->
+    <div id="private-content" class="protected">
+      <section class="glass hero">
+        <span class="hero-emoji">💜</span>
+        <h1>فقط برای تو</h1>
+        <p class="subtitle">اینجا حرف‌هایی هست که فقط خودت باید ببینی</p>
+      </section>
+
+      <section class="glass message-card">
+        <div class="warning-box" style="margin-bottom: 1.5rem;">
+          📵 لطفاً از این صفحه اسکرین‌شات نگیر. این حرفا فقط برای چشم‌های توئه.
+        </div>
+
+        <h2>نامه‌ای که فقط تو می‌خونی</h2>
+        <p>
+          سپید عزیزم،
+        </p>
+        <p>
+          اگه تا اینجا اومدی، یعنی کلید رو درست زدی... و این یعنی این لحظه فقط مال ما دوتاست.
+        </p>
+        <p>
+          چیزایی هست که گاهی تو حرفای روزمره نمی‌گم، نه چون مهم نیستن، 
+          بلکه چون می‌خوام تو یه فضای آروم و خصوصی بهت بگم.
+        </p>
+        <p>
+          تو برام خونه هستی. نه ساختمون و دیوار... بلکه اون حس امنیتی که فقط با تو دارم. 
+          وقتی کنارت‌ام، دنیا آروم‌تر می‌شه. وقتی نیستی، یه جای خالی حس می‌کنم که فقط تو پرش می‌کنی.
+        </p>
+        <p>
+          ممنونم که منو انتخاب کردی. ممنونم که با همه ناقص بودن‌هام، هنوز کنارمی. 
+          و ممنونم که بهم یاد دادی عشق می‌تونه هم نرم باشه، هم قوی.
+        </p>
+      </section>
+
+      <section class="glass message-card">
+        <h2>یه راز کوچیک</h2>
+        <p>
+          گاهی شب‌ها قبل خواب، بهت فکر می‌کنم و لبخند می‌زنم. 
+          گاهی هم نگران می‌شم که نکنه نتونم اون‌قدر که لایقش هستی، خوشحالت کنم.
+        </p>
+        <p>
+          ولی یکی هست که مطمئنم: تا وقتی که نفس می‌کشم، سعی می‌کنم کنارت باشم. 
+          تو روزای خوب و تو روزای سخت.
+        </p>
+        <p>
+          تولدت مبارک، عشق من. 
+          امیدوارم امسال برات پر از چیزایی باشه که دلت می‌خواد... و من هم یکی از اون چیزا باشم.
+        </p>
+        <div class="divider">❀</div>
+        <p style="text-align: center; font-weight: 600; color: var(--purple-deep); font-size: 1.1rem;">
+          با تمام قلبم<br>
+          کیا
+        </p>
+      </section>
+
+      <section class="glass" style="text-align: center;">
+        <p style="margin-bottom: 1rem; color: var(--text-muted);">
+          این صفحه بعد از بستن مرورگر یا بعد از مدتی منقضی می‌شه.
+        </p>
+        <button class="btn" style="max-width: 220px;" onclick="logout()">خروج از بخش خصوصی</button>
+      </section>
+    </div>
+  </div>
+
+  <!-- Overlay when user tries to leave or screenshot-ish -->
+  <div class="blur-overlay" id="blur-overlay">
+    <div>
+      <p style="font-size: 2rem; margin-bottom: 1rem;">👀</p>
+      <p>این محتوا فقط وقتی صفحه فعاله قابل مشاهد‌ست</p>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <span>Made by Kia & Grok for Sepid Birthday</span>
+  </footer>
+
+  <script src="/js/main.js"></script>
+  <script src="/js/private.js"></script>
+</body>
+</html>

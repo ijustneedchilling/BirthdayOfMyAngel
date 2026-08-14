@@ -1,0 +1,20 @@
+{
+  "name": "sepid-birthday",
+  "version": "1.0.0",
+  "description": "A beautiful glassmorphism birthday website for Sepid - Made by Kia & Grok",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "cookie-parser": "^1.4.6"
+  },
+  "keywords": ["birthday", "sepid", "glassmorphism"],
+  "author": "Kia & Grok",
+  "license": "MIT"
+}
