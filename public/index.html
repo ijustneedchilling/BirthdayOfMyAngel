@@ -9,12 +9,22 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>">
 </head>
 <body>
-  <!-- ===== INTRO / LOVE COUNTER ANIMATION ===== -->
+  <!-- ===== INTRO / TERMINAL LOVE COUNTER ===== -->
   <div id="intro-overlay">
-    <div class="intro-content">
-      <div class="intro-label">در حال محاسبه میزان علاقه...</div>
-      <div class="intro-counter" id="intro-counter">0</div>
-      <div class="intro-status" id="intro-status"></div>
+    <div class="terminal-window">
+      <div class="terminal-header">
+        <span class="terminal-dot red"></span>
+        <span class="terminal-dot yellow"></span>
+        <span class="terminal-dot green"></span>
+        <span class="terminal-title">love_calculator.exe</span>
+      </div>
+      <div class="terminal-body" id="terminal-body">
+        <div class="term-line">$ initializing love_calculator...</div>
+        <div class="term-line">$ measuring heart intensity for: <span style="color:#f0b8d0">Sepid</span></div>
+        <div class="term-line">$ starting count...</div>
+        <div class="term-line term-counter">LOVE_LEVEL = <span id="intro-counter">0</span></div>
+        <div class="term-line" id="intro-status"></div>
+      </div>
     </div>
     <div id="error-popups"></div>
     <div id="intro-final" style="display:none;">
@@ -116,18 +126,19 @@
       const overlay = document.getElementById('intro-overlay');
       const counterEl = document.getElementById('intro-counter');
       const statusEl = document.getElementById('intro-status');
+      const terminalBody = document.getElementById('terminal-body');
       const errorBox = document.getElementById('error-popups');
       const finalBox = document.getElementById('intro-final');
       const enterBtn = document.getElementById('intro-enter');
+      const counterLine = counterEl.closest('.term-counter');
 
-      // Show only once per browser session
       if (sessionStorage.getItem('sepid_intro_done')) {
         overlay.classList.add('hidden');
         return;
       }
 
       let value = 0;
-      let phase = 0; // 0: slow, 1: fast, 2: errors, 3: done
+      let phase = 0;
       const errors = [
         'ERROR: overflow',
         'ERROR: value too large',
@@ -135,67 +146,96 @@
         'ERROR: stack overflow',
         'ERROR: infinite loop detected',
         'ERROR: heart.exe crashed',
-        'FATAL: numbers not enough'
+        'FATAL: numbers not enough',
+        'ERROR: memory exceeded',
+        'ERROR: love_level = Infinity',
+        'CRITICAL: buffer overrun',
+        'ERROR: exception in heart.dll',
+        'FATAL: system halted',
+        'ERROR: 0xLOVE_TOO_BIG',
+        'ERROR: calculation failed',
+        'WARNING: emotional overflow'
       ];
 
       function random(min, max) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
       }
 
+      function addTermLine(text, color) {
+        const line = document.createElement('div');
+        line.className = 'term-line';
+        line.textContent = text;
+        if (color) line.style.color = color;
+        terminalBody.appendChild(line);
+        terminalBody.scrollTop = terminalBody.scrollHeight;
+      }
+
       function spawnError() {
         const pop = document.createElement('div');
         pop.className = 'error-popup';
         pop.textContent = errors[random(0, errors.length - 1)];
-        pop.style.left = random(5, 70) + '%';
-        pop.style.top = random(10, 75) + '%';
+        // Spread all over the screen
+        pop.style.left = random(2, 78) + '%';
+        pop.style.top = random(3, 88) + '%';
+        pop.style.transform = 'rotate(' + random(-6, 6) + 'deg)';
         errorBox.appendChild(pop);
-        setTimeout(() => pop.remove(), 1800);
+        // Keep them longer so the screen fills up
+        setTimeout(() => {
+          pop.style.transition = 'opacity 0.4s';
+          pop.style.opacity = '0';
+          setTimeout(() => pop.remove(), 400);
+        }, 2200);
       }
 
       function tick() {
         if (phase === 0) {
-          // Slow start
-          value += random(1, 4);
+          value += random(1, 5);
           counterEl.textContent = value;
-          statusEl.textContent = 'calculating...';
+          statusEl.textContent = '$ counting...';
 
-          if (value > 40) {
+          if (value > 35) {
             phase = 1;
-            counterEl.classList.add('glitch');
-            statusEl.textContent = 'accelerating...';
+            counterLine.classList.add('glitch');
+            statusEl.textContent = '$ WARNING: accelerating rapidly...';
+            statusEl.style.color = '#e080a0';
           }
-          setTimeout(tick, 90);
+          setTimeout(tick, 85);
         } else if (phase === 1) {
-          // Fast counting to 1000+
-          value += random(18, 55);
-          if (value > 1000) value = 1000 + random(0, 200);
+          value += random(25, 70);
+          if (value > 1200) value = 1200 + random(0, 300);
           counterEl.textContent = value;
-          statusEl.textContent = '>>> OVERLOAD <<<';
+          statusEl.textContent = '$ >>> OVERLOAD DETECTED <<<';
+          statusEl.style.color = '#ff6b9d';
 
           if (value >= 1000) {
             phase = 2;
-            statusEl.textContent = 'CRITICAL ERROR';
-            // Spawn several errors
+            statusEl.textContent = '$ CRITICAL ERROR — SYSTEM FAILING';
+            statusEl.style.color = '#ff4060';
+            addTermLine('$ ERROR: love value exceeded integer limit', '#ff6b9d');
+            addTermLine('$ attempting emergency shutdown...', '#ff8aaa');
+
+            // Flood the entire screen with errors
             let errCount = 0;
             const errInterval = setInterval(() => {
+              // Spawn 2-3 at a time for denser coverage
               spawnError();
+              if (Math.random() > 0.4) spawnError();
+              if (Math.random() > 0.7) spawnError();
               errCount++;
-              if (errCount >= 8) {
+              if (errCount >= 18) {
                 clearInterval(errInterval);
                 setTimeout(() => {
-                  phase = 3;
                   finalBox.style.display = 'flex';
-                }, 900);
+                }, 700);
               }
-            }, 180);
+            }, 110);
           } else {
-            setTimeout(tick, 35);
+            setTimeout(tick, 28);
           }
         }
       }
 
-      // Start after tiny delay
-      setTimeout(tick, 600);
+      setTimeout(tick, 700);
 
       enterBtn.addEventListener('click', () => {
         sessionStorage.setItem('sepid_intro_done', '1');
