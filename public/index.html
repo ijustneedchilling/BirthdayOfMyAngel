@@ -11,7 +11,19 @@
 <body>
   <!-- ===== INTRO / TERMINAL LOVE COUNTER ===== -->
   <div id="intro-overlay">
-    <div class="terminal-window">
+    <!-- Step 0: Ready screen -->
+    <div id="intro-ready" class="intro-ready-box">
+      <p class="ready-emoji">💻💜</p>
+      <p class="ready-text">
+        می‌خوام با اعداد بهت نشون بدم<br>
+        چقد دوست دارم
+      </p>
+      <p class="ready-sub">حاضری؟</p>
+      <button class="btn intro-btn" id="intro-ready-btn">آره، بزن بریم</button>
+    </div>
+
+    <!-- Terminal (hidden at first) -->
+    <div class="terminal-window" id="terminal-window" style="display:none;">
       <div class="terminal-header">
         <span class="terminal-dot red"></span>
         <span class="terminal-dot yellow"></span>
@@ -20,13 +32,14 @@
       </div>
       <div class="terminal-body" id="terminal-body">
         <div class="term-line">$ initializing love_calculator...</div>
-        <div class="term-line">$ measuring heart intensity for: <span style="color:#f0b8d0">Sepid</span></div>
-        <div class="term-line">$ starting count...</div>
+        <div class="term-line">$ target: <span style="color:#f0b8d0">Sepid</span></div>
         <div class="term-line term-counter">LOVE_LEVEL = <span id="intro-counter">0</span></div>
         <div class="term-line" id="intro-status"></div>
       </div>
     </div>
+
     <div id="error-popups"></div>
+
     <div id="intro-final" style="display:none;">
       <div class="intro-final-box">
         <p class="intro-final-emoji">😭💻</p>
@@ -124,6 +137,9 @@
   <script>
     (function () {
       const overlay = document.getElementById('intro-overlay');
+      const readyBox = document.getElementById('intro-ready');
+      const readyBtn = document.getElementById('intro-ready-btn');
+      const terminalWindow = document.getElementById('terminal-window');
       const counterEl = document.getElementById('intro-counter');
       const statusEl = document.getElementById('intro-status');
       const terminalBody = document.getElementById('terminal-body');
@@ -174,68 +190,85 @@
         const pop = document.createElement('div');
         pop.className = 'error-popup';
         pop.textContent = errors[random(0, errors.length - 1)];
-        // Spread all over the screen
         pop.style.left = random(2, 78) + '%';
         pop.style.top = random(3, 88) + '%';
         pop.style.transform = 'rotate(' + random(-6, 6) + 'deg)';
         errorBox.appendChild(pop);
-        // Keep them longer so the screen fills up
         setTimeout(() => {
-          pop.style.transition = 'opacity 0.4s';
+          pop.style.transition = 'opacity 0.5s';
           pop.style.opacity = '0';
-          setTimeout(() => pop.remove(), 400);
-        }, 2200);
+          setTimeout(() => pop.remove(), 500);
+        }, 2800);
       }
 
-      function tick() {
-        if (phase === 0) {
-          value += random(1, 5);
-          counterEl.textContent = value;
-          statusEl.textContent = '$ counting...';
+      function startCounting() {
+        readyBox.style.display = 'none';
+        terminalWindow.style.display = 'block';
 
-          if (value > 35) {
-            phase = 1;
-            counterLine.classList.add('glitch');
-            statusEl.textContent = '$ WARNING: accelerating rapidly...';
-            statusEl.style.color = '#e080a0';
-          }
-          setTimeout(tick, 85);
-        } else if (phase === 1) {
-          value += random(25, 70);
-          if (value > 1200) value = 1200 + random(0, 300);
-          counterEl.textContent = value;
-          statusEl.textContent = '$ >>> OVERLOAD DETECTED <<<';
-          statusEl.style.color = '#ff6b9d';
+        // Slow phase
+        function tick() {
+          if (phase === 0) {
+            value += random(1, 3);
+            counterEl.textContent = value;
+            statusEl.textContent = '$ counting slowly...';
+            statusEl.style.color = '#c8b0d0';
 
-          if (value >= 1000) {
-            phase = 2;
-            statusEl.textContent = '$ CRITICAL ERROR — SYSTEM FAILING';
-            statusEl.style.color = '#ff4060';
-            addTermLine('$ ERROR: love value exceeded integer limit', '#ff6b9d');
-            addTermLine('$ attempting emergency shutdown...', '#ff8aaa');
+            if (value >= 25) {
+              phase = 1;
+              statusEl.textContent = '$ speeding up...';
+              statusEl.style.color = '#e0a0c0';
+            }
+            setTimeout(tick, 160); // slower
+          } else if (phase === 1) {
+            value += random(4, 12);
+            counterEl.textContent = value;
+            statusEl.textContent = '$ calculating intensity...';
 
-            // Flood the entire screen with errors
-            let errCount = 0;
-            const errInterval = setInterval(() => {
-              // Spawn 2-3 at a time for denser coverage
-              spawnError();
-              if (Math.random() > 0.4) spawnError();
-              if (Math.random() > 0.7) spawnError();
-              errCount++;
-              if (errCount >= 18) {
-                clearInterval(errInterval);
-                setTimeout(() => {
-                  finalBox.style.display = 'flex';
-                }, 700);
-              }
-            }, 110);
-          } else {
-            setTimeout(tick, 28);
+            if (value >= 120) {
+              phase = 2;
+              counterLine.classList.add('glitch');
+              statusEl.textContent = '$ WARNING: value rising too fast';
+              statusEl.style.color = '#ff8aaa';
+              addTermLine('$ warning: unusual growth rate detected', '#e080a0');
+            }
+            setTimeout(tick, 90);
+          } else if (phase === 2) {
+            value += random(15, 40);
+            if (value > 1100) value = 1100 + random(0, 250);
+            counterEl.textContent = value;
+            statusEl.textContent = '$ >>> OVERLOAD <<<';
+            statusEl.style.color = '#ff6b9d';
+
+            if (value >= 1000) {
+              phase = 3;
+              statusEl.textContent = '$ CRITICAL ERROR — SYSTEM FAILING';
+              statusEl.style.color = '#ff4060';
+              addTermLine('$ ERROR: love value exceeded integer limit', '#ff6b9d');
+              addTermLine('$ attempting emergency shutdown...', '#ff8aaa');
+
+              // Flood errors a bit slower so user sees them
+              let errCount = 0;
+              const errInterval = setInterval(() => {
+                spawnError();
+                if (Math.random() > 0.45) spawnError();
+                errCount++;
+                if (errCount >= 16) {
+                  clearInterval(errInterval);
+                  setTimeout(() => {
+                    finalBox.style.display = 'flex';
+                  }, 900);
+                }
+              }, 160);
+            } else {
+              setTimeout(tick, 55);
+            }
           }
         }
+
+        setTimeout(tick, 500);
       }
 
-      setTimeout(tick, 700);
+      readyBtn.addEventListener('click', startCounting);
 
       enterBtn.addEventListener('click', () => {
         sessionStorage.setItem('sepid_intro_done', '1');
