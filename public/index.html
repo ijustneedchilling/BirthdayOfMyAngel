@@ -9,6 +9,28 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>">
 </head>
 <body>
+  <!-- ===== INTRO / LOVE COUNTER ANIMATION ===== -->
+  <div id="intro-overlay">
+    <div class="intro-content">
+      <div class="intro-label">در حال محاسبه میزان علاقه...</div>
+      <div class="intro-counter" id="intro-counter">0</div>
+      <div class="intro-status" id="intro-status"></div>
+    </div>
+    <div id="error-popups"></div>
+    <div id="intro-final" style="display:none;">
+      <div class="intro-final-box">
+        <p class="intro-final-emoji">😭💻</p>
+        <p class="intro-final-text">
+          ای بابا...<br>
+          نتونستم با اعداد نشون بدم<br>
+          چقد دوست دارم
+        </p>
+        <p class="intro-final-sub">بیا بریم سراغ پیام‌ها 💜</p>
+        <button class="btn intro-btn" id="intro-enter">بزن بریم</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Decorative floating flowers -->
   <div class="flower lily" style="top: 15%; left: 8%; animation-delay: 0s;"></div>
   <div class="flower tulip" style="top: 40%; right: 6%; animation-delay: 2s;"></div>
@@ -89,5 +111,97 @@
   </footer>
 
   <script src="/js/main.js"></script>
+  <script>
+    (function () {
+      const overlay = document.getElementById('intro-overlay');
+      const counterEl = document.getElementById('intro-counter');
+      const statusEl = document.getElementById('intro-status');
+      const errorBox = document.getElementById('error-popups');
+      const finalBox = document.getElementById('intro-final');
+      const enterBtn = document.getElementById('intro-enter');
+
+      // Show only once per browser session
+      if (sessionStorage.getItem('sepid_intro_done')) {
+        overlay.classList.add('hidden');
+        return;
+      }
+
+      let value = 0;
+      let phase = 0; // 0: slow, 1: fast, 2: errors, 3: done
+      const errors = [
+        'ERROR: overflow',
+        'ERROR: value too large',
+        'ERROR: cannot compute love',
+        'ERROR: stack overflow',
+        'ERROR: infinite loop detected',
+        'ERROR: heart.exe crashed',
+        'FATAL: numbers not enough'
+      ];
+
+      function random(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      }
+
+      function spawnError() {
+        const pop = document.createElement('div');
+        pop.className = 'error-popup';
+        pop.textContent = errors[random(0, errors.length - 1)];
+        pop.style.left = random(5, 70) + '%';
+        pop.style.top = random(10, 75) + '%';
+        errorBox.appendChild(pop);
+        setTimeout(() => pop.remove(), 1800);
+      }
+
+      function tick() {
+        if (phase === 0) {
+          // Slow start
+          value += random(1, 4);
+          counterEl.textContent = value;
+          statusEl.textContent = 'calculating...';
+
+          if (value > 40) {
+            phase = 1;
+            counterEl.classList.add('glitch');
+            statusEl.textContent = 'accelerating...';
+          }
+          setTimeout(tick, 90);
+        } else if (phase === 1) {
+          // Fast counting to 1000+
+          value += random(18, 55);
+          if (value > 1000) value = 1000 + random(0, 200);
+          counterEl.textContent = value;
+          statusEl.textContent = '>>> OVERLOAD <<<';
+
+          if (value >= 1000) {
+            phase = 2;
+            statusEl.textContent = 'CRITICAL ERROR';
+            // Spawn several errors
+            let errCount = 0;
+            const errInterval = setInterval(() => {
+              spawnError();
+              errCount++;
+              if (errCount >= 8) {
+                clearInterval(errInterval);
+                setTimeout(() => {
+                  phase = 3;
+                  finalBox.style.display = 'flex';
+                }, 900);
+              }
+            }, 180);
+          } else {
+            setTimeout(tick, 35);
+          }
+        }
+      }
+
+      // Start after tiny delay
+      setTimeout(tick, 600);
+
+      enterBtn.addEventListener('click', () => {
+        sessionStorage.setItem('sepid_intro_done', '1');
+        overlay.classList.add('hidden');
+      });
+    })();
+  </script>
 </body>
 </html>
