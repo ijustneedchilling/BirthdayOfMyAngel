@@ -73,6 +73,7 @@ btnYes.addEventListener('click', async () => {
     <button type="button" class="btn" id="btn-continue-yes" style="max-width: 240px; margin: 0 auto;">بزن بریم پیامتو ببین</button>
   `;
   document.getElementById('btn-continue-yes').addEventListener('click', finishGame);
+  if (window.launchConfetti) window.launchConfetti();
 });
 
 btnNo.addEventListener('click', () => {

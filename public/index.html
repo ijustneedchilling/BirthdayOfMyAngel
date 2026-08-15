@@ -70,7 +70,7 @@
   <div class="container">
     <!-- Hero -->
     <section class="glass hero">
-      <span class="hero-emoji">🌸💜🌷</span>
+      <span class="hero-emoji">🌸<span class="pulse-heart">💜</span>🌷</span>
       <h1>تولدت مبارک<br>سپید جان</h1>
       <p class="subtitle">یه روز خاص برای یه آدم خیلی خاص</p>
     </section>
@@ -186,7 +186,39 @@
         terminalBody.scrollTop = terminalBody.scrollHeight;
       }
 
-      function spawnError() {
+      // Classic error sound via Web Audio API
+      let audioCtx = null;
+      function playErrorSound() {
+        try {
+          if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          const t = audioCtx.currentTime;
+
+          // Harsh buzzy error tone (similar to classic system error)
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          const filter = audioCtx.createBiquadFilter();
+
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(440, t);
+          osc.frequency.exponentialRampToValueAtTime(110, t + 0.18);
+
+          filter.type = 'lowpass';
+          filter.frequency.value = 1200;
+
+          gain.gain.setValueAtTime(0.0001, t);
+          gain.gain.exponentialRampToValueAtTime(0.25, t + 0.01);
+          gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);
+
+          osc.connect(filter);
+          filter.connect(gain);
+          gain.connect(audioCtx.destination);
+
+          osc.start(t);
+          osc.stop(t + 0.23);
+        } catch (e) {}
+      }
+
+      function spawnError(playSound) {
         const pop = document.createElement('div');
         pop.className = 'error-popup';
         pop.textContent = errors[random(0, errors.length - 1)];
@@ -194,6 +226,7 @@
         pop.style.top = random(3, 88) + '%';
         pop.style.transform = 'rotate(' + random(-6, 6) + 'deg)';
         errorBox.appendChild(pop);
+        if (playSound) playErrorSound();
         setTimeout(() => {
           pop.style.transition = 'opacity 0.5s';
           pop.style.opacity = '0';
@@ -202,6 +235,12 @@
       }
 
       function startCounting() {
+        // Unlock audio context on user gesture
+        try {
+          if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          if (audioCtx.state === 'suspended') audioCtx.resume();
+        } catch (e) {}
+
         readyBox.style.display = 'none';
         terminalWindow.style.display = 'block';
 
@@ -249,8 +288,10 @@
               // Flood errors a bit slower so user sees them
               let errCount = 0;
               const errInterval = setInterval(() => {
-                spawnError();
-                if (Math.random() > 0.45) spawnError();
+                // Play sound on most errors (not every single one to avoid audio spam)
+                const withSound = errCount % 2 === 0;
+                spawnError(withSound);
+                if (Math.random() > 0.45) spawnError(false);
                 errCount++;
                 if (errCount >= 16) {
                   clearInterval(errInterval);
@@ -273,6 +314,9 @@
       enterBtn.addEventListener('click', () => {
         sessionStorage.setItem('sepid_intro_done', '1');
         overlay.classList.add('hidden');
+        // Celebration
+        if (window.launchConfetti) window.launchConfetti();
+        if (window.startHearts) window.startHearts();
       });
     })();
   </script>

@@ -795,3 +795,62 @@ p {
   font-family: 'Vazirmatn', sans-serif;
   font-weight: 600;
 }
+
+/* Floating hearts background */
+.heart-particle {
+  position: fixed;
+  pointer-events: none;
+  z-index: 1;
+  font-size: 1rem;
+  opacity: 0;
+  animation: heartFloat 8s ease-in forwards;
+  color: #e8a0c0;
+  text-shadow: 0 0 10px rgba(220, 120, 170, 0.4);
+}
+
+@keyframes heartFloat {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0.6) rotate(0deg);
+  }
+  15% {
+    opacity: 0.55;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-100vh) scale(1.1) rotate(40deg);
+  }
+}
+
+/* Confetti pieces */
+.confetti-piece {
+  position: fixed;
+  width: 8px;
+  height: 8px;
+  z-index: 99998;
+  pointer-events: none;
+  border-radius: 2px;
+  animation: confettiFall 2.8s ease-out forwards;
+}
+
+@keyframes confettiFall {
+  0% {
+    opacity: 1;
+    transform: translateY(0) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(100vh) rotate(720deg);
+  }
+}
+
+/* Soft pulse for special elements */
+.pulse-heart {
+  display: inline-block;
+  animation: pulseHeart 1.6s ease-in-out infinite;
+}
+
+@keyframes pulseHeart {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
